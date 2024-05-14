@@ -1,10 +1,14 @@
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageOps
+import easygui
 import os
 
 
 def get_b(p):
     r, g, b = p
     return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+input_file = easygui.fileopenbox()
 
 
 k = int(input('width: '))
@@ -14,7 +18,7 @@ x = int(input('x: '))
 characters = """¶@ØÆMåBNÊßÔR#8Q&mÃ0À$GXZA5ñk2S%±3Fz¢yÝCJf1t7ªLc¿+?(r/¤²!*;"^:,'.` """
 
 
-with Image.open('image.jpg') as image:
+with Image.open(input_file) as image:
 
     if os.path.exists(f"arts/{name}"):
         pass
@@ -23,12 +27,13 @@ with Image.open('image.jpg') as image:
         os.mkdir(f"arts/{name}/images")
         os.mkdir(f"arts/{name}/results")
 
-    image.save(f'arts/{name}/images/orig {name}.png')
-    enhancer = ImageEnhance.Contrast(image)
+    original = ImageOps.exif_transpose(image)
+    original.save(f'arts/{name}/images/orig {name}.png')
+    enhancer = ImageEnhance.Contrast(original)
 
     for h in range(attempts):
         enh_image = enhancer.enhance(h+1)
-        resized_image = enh_image.resize((k, image.height//(image.width//k)))
+        resized_image = enh_image.resize((k, original.height//(original.width//k)))
         px = resized_image.load()
 
         with open(f"arts/{name}/results/c{h+1} w{k} {name} x{x}.txt", "w", encoding="utf-8") as t:
@@ -41,3 +46,5 @@ with Image.open('image.jpg') as image:
 
     print('\nDone')
     print(f'\nResults saved in arts/{name}')
+    final = os.path.abspath(f"arts/{name}")
+    os.system(f"explorer {final}")
